@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CFD BD Performance Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+       
+        body {
+            font-family: 'Calibri', Arial, sans-serif;
+            background: #f0f0f0;
+            padding: 20px;
+        }
+       
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+       
+        .tabs {
+            display: flex;
+            background: #2b579a;
+            border-bottom: 3px solid #1f4172;
+            flex-wrap: wrap;
+        }
+       
+        .tab {
+            padding: 15px 25px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            border-right: 1px solid #1f4172;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+       
+        .tab:hover {
+            background: #1f4172;
+        }
+       
+        .tab.active {
+            background: white;
+            color: #2b579a;
+        }
+       
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+       
+        .tab-content.active {
+            display: block;
+        }
+       
+        h2 {
+            color: #2b579a;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2b579a;
+        }
+       
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+       
+        .form-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+       
+        label {
+            font-weight: bold;
+            color: #333;
+        }
+       
+        input, select, textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+       
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #2b579a;
+            box-shadow: 0 0 5px rgba(43, 87, 154, 0.3);
+        }
+       
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+       
+        .excel-table th {
+            background: #2b579a;
+            color: white;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #1f4172;
+            font-size: 11px;
+        }
+       
+        .excel-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            background: white;
+        }
+       
+        .excel-table tr:hover td {
+            background: #f8f9fa;
+        }
+       
+        .excel-table input, .excel-table select {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            font-size: 12px;
+        }
+       
+        .excel-table textarea {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            font-size: 12px;
+            min-height: 40px;
+        }
+       
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+       
+        .btn-primary {
+            background: #2b579a;
+            color: white;
+        }
+       
+        .btn-primary:hover {
+            background: #1f4172;
+        }
+       
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+       
+        .btn-success:hover {
+            background: #218838;
+        }
+       
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+       
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+       
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+       
+        .section-title {
+            background: #2b579a;
+            color: white;
+            padding: 10px 15px;
+            margin: 20px 0 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+       
+        .button-group {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+       
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+       
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+       
+        .stat-card h3 {
+            font-size: 13px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+       
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+       
+        .stat-card.red {
+            background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+        }
+       
+        .stat-card.green {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+       
+        .stat-card.blue {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        }
+       
+        .stat-card.yellow {
+            background: linear-gradient(135deg, #ecc94b 0%, #d69e2e 100%);
+        }
+       
+        .summary-box {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #2b579a;
+        }
+       
+        .summary-box h3 {
+            color: #2b579a;
+            margin-bottom: 10px;
+        }
+       
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #ccc;
+        }
+       
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+       
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+       
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+       
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2b579a;
+        }
+       
+        .close-modal {
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+       
+        .close-modal:hover {
+            color: #333;
+        }
+       
+        .table-wrapper {
+            overflow-x: auto;
+        }
+       
+        .net-deposit-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #28a745;
+            padding: 10px;
+            background: #e7f3ff;
+            border-radius: 5px;
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab(0)">📝 Data Entry</div>
+            <div class="tab" onclick="switchTab(1)">📊 Manager Dashboard</div>
+            <div class="tab" onclick="switchTab(2)">📈 Weekly Report</div>
+            <div class="tab" onclick="switchTab(3)">📅 Monthly Report</div>
+            <div class="tab" onclick="switchTab(4)">📥 Export Reports</div>
+        </div>
+        <!-- TAB 1: DATA ENTRY -->
+        <div class="tab-content active">
+            <h2>💼 BD Executive - Data Entry Form</h2>
+           
+            <div class="form-section">
+                <div class="form-row">
+                    <label>BD Executive Name:</label>
+                    <select id="bdName">
+                        <option value="">Select your name</option>
+                        <option value="Adrian">Adrian</option>
+                        <option value="Toni">Toni</option>
+                        <option value="Rain">Rain</option>
+                        <option value="Cindy">Cindy</option>
+                        <option value="Maple">Maple</option>
+                        <option value="Vic">Vic</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Week Number:</label>
+                    <input type="week" id="weekNumber">
+                </div>
+                <div class="form-row">
+                    <label>Month:</label>
+                    <select id="monthSelect">
+                        <option value="Jan">January</option>
+                        <option value="Feb">February</option>
+                        <option value="Mar">March</option>
+                        <option value="Apr">April</option>
+                        <option value="May">May</option>
+                        <option value="Jun">June</option>
+                        <option value="Jul">July</option>
+                        <option value="Aug">August</option>
+                        <option value="Sep">September</option>
+                        <option value="Oct">October</option>
+                        <option value="Nov">November</option>
+                        <option value="Dec">December</option>
+                    </select>
+                </div>
+            </div>
+            <div class="section-title">
+                ⚠️ MINIMUM REQUIREMENT - Loyal Clients (Weekly)
+                <button class="btn btn-success btn-small" onclick="addClientRow('minClients')">+ Add Client</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th>Client Name</th>
+                            <th>Email</th>
+                            <th>Type</th>
+                            <th>Total Deposit ($)</th>
+                            <th>Total Withdrawal ($)</th>
+                            <th>Net Deposit ($)</th>
+                            <th>Status (FTD/Active)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="minClients">
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: #999;">Click "+ Add Client" to add minimum requirement clients</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="summary-box">
+                <h3>Minimum Requirement Summary</h3>
+                <div class="summary-item"><span>Total New FTDs:</span><strong id="sumMinFTD">0</strong></div>
+                <div class="summary-item"><span>Total Active Clients:</span><strong id="sumMinActive">0</strong></div>
+                <div class="summary-item"><span>Target Status:</span><strong id="minTargetStatus">Need 3 FTDs & 3 Active</strong></div>
+            </div>
+            <div class="section-title">
+                📊 LEVEL 1: Activity & Pipeline (Weekly)
+                <button class="btn btn-success btn-small" onclick="addLeadRow('qualifiedLeads')">+ Add Lead</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th>Lead Name</th>
+                            <th>Email</th>
+                            <th>Type</th>
+                            <th>Potential Net Deposit ($)</th>
+                            <th>Background/Notes</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="qualifiedLeads">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #999;">Click "+ Add Lead" to add qualified leads</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="summary-box">
+                <h3>Qualified Leads Summary</h3>
+                <div class="summary-item"><span>Total Qualified Leads:</span><strong id="sumQualLeads">0</strong></div>
+                <div class="summary-item"><span>Target:</span><strong>25 leads</strong></div>
+                <div class="summary-item"><span>Status:</span><strong id="qualLeadsStatus">0/25</strong></div>
+            </div>
+            <div class="section-title">
+                📋 Account Registrations (Weekly)
+                <button class="btn btn-success btn-small" onclick="addRegistrationRow('accountRegistrations')">+ Add Registration</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th>Client Name</th>
+                            <th>Email</th>
+                            <th>Type</th>
+                            <th>Potential Net Deposit ($)</th>
+                            <th>Background/Source</th>
+                            <th>Registration Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountRegistrations">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #999;">Click "+ Add Registration" to add account registrations</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="summary-box">
+                <h3>Account Registrations Summary</h3>
+                <div class="summary-item"><span>Total Registrations:</span><strong id="sumAccountReg">0</strong></div>
+                <div class="summary-item"><span>Target:</span><strong>15 registrations</strong></div>
+                <div class="summary-item"><span>Status:</span><strong id="accountRegStatus">0/15</strong></div>
+            </div>
+            <div class="section-title">
+                💰 LEVEL 2: First Time Deposits (Weekly)
+                <button class="btn btn-success btn-small" onclick="addFTDRow('ftdClients')">+ Add FTD Client</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th>Client Name</th>
+                            <th>Email</th>
+                            <th>Type</th>
+                            <th>Total Deposit ($)</th>
+                            <th>Total Withdrawal ($)</th>
+                            <th>Net Deposit ($)</th>
+                            <th>Deposit Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ftdClients">
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: #999;">Click "+ Add FTD Client" to add FTD clients (≥$300)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="summary-box">
+                <h3>FTD Summary</h3>
+                <div class="summary-item"><span>Total FTDs (≥$300):</span><strong id="sumFTD">0</strong></div>
+                <div class="summary-item"><span>Total Net Deposits:</span><strong id="sumFTDNet">$0</strong></div>
+                <div class="summary-item"><span>Target:</span><strong>5 FTDs</strong></div>
+                <div class="summary-item"><span>Status:</span><strong id="ftdStatus">0/5</strong></div>
+            </div>
+            <div class="section-title">
+                📈 Active Trading Clients (Monthly)
+                <button class="btn btn-success btn-small" onclick="addActiveTraderRow('activeTraders')">+ Add Active Trader</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th>Client Name</th>
+                            <th>Email</th>
+                            <th>Type</th>
+                            <th>Total Deposit ($)</th>
+                            <th>Total Withdrawal ($)</th>
+                            <th>Net Deposit ($)</th>
+                            <th>Total Lots Traded</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activeTraders">
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: #999;">Click "+ Add Active Trader" to add active traders (≥10 lots)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="summary-box">
+                <h3>Active Traders Summary</h3>
+                <div class="summary-item"><span>Total Active Traders (≥10 lots):</span><strong id="sumActiveTraders">0</strong></div>
+                <div class="summary-item"><span>Total Net Deposits:</span><strong id="sumActiveNet">$0</strong></div>
+                <div class="summary-item"><span>Target:</span><strong>10 traders</strong></div>
+                <div class="summary-item"><span>Status:</span><strong id="activeTraderStatus">0/10</strong></div>
+            </div>
+            <div class="section-title">🏆 LEVEL 3: Monthly Revenue (Net Deposit Calculation)</div>
+            <div class="form-section">
+                <div class="form-row">
+                    <label>Total Deposits ($):</label>
+                    <input type="number" id="totalDeposits" placeholder="0" min="0" oninput="calculateNetRevenue()">
+                </div>
+                <div class="form-row">
+                    <label>Total Withdrawals ($):</label>
+                    <input type="number" id="totalWithdrawals" placeholder="0" min="0" oninput="calculateNetRevenue()">
+                </div>
+                <div class="form-row">
+                    <label>Net Revenue (Auto):</label>
+                    <div class="net-deposit-display" id="netRevenue">$0</div>
+                </div>
+            </div>
+            <div class="summary-box">
+                <h3>Revenue Summary</h3>
+                <div class="summary-item"><span>Net Revenue:</span><strong id="netRevenueDisplay">$0</strong></div>
+                <div class="summary-item"><span>Target:</span><strong>$50,000</strong></div>
+                <div class="summary-item"><span>Reward Tier:</span><strong id="rewardTierDisplay">None</strong></div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-success" onclick="saveAllData()">💾 Save All Data</button>
+                <button class="btn btn-primary" onclick="calculateSummaries()">🔄 Calculate Summary</button>
+                <button class="btn btn-warning" onclick="clearAllData()">🗑️ Clear All Entries</button>
+            </div>
+        </div>
+        <!-- TAB 2: MANAGER DASHBOARD -->
+        <div class="tab-content">
+            <h2>📊 Manager Dashboard - Quick Overview</h2>
+           
+            <div class="dashboard-grid">
+                <div class="stat-card red">
+                    <h3>Minimum Requirement</h3>
+                    <div class="value" id="dashMinStatus">0/2</div>
+                    <small>Targets Met</small>
+                </div>
+                <div class="stat-card blue">
+                    <h3>Level 1 (Pipeline)</h3>
+                    <div class="value" id="dashLevel1">0/2</div>
+                    <small>Targets Met</small>
+                </div>
+                <div class="stat-card">
+                    <h3>Level 2 (Conversion)</h3>
+                    <div class="value" id="dashLevel2">0/2</div>
+                    <small>Targets Met</small>
+                </div>
+                <div class="stat-card green">
+                    <h3>Level 3 (Net Revenue)</h3>
+                    <div class="value" id="dashRevenue">$0</div>
+                    <small>Current Net Revenue</small>
+                </div>
+            </div>
+            <h3>📋 Team Performance Summary</h3>
+            <div class="table-wrapper">
+                <table class="excel-table">
+                    <tr>
+                        <th>BD Executive</th>
+                        <th>Week/Month</th>
+                        <th>Min FTD</th>
+                        <th>Min Active</th>
+                        <th>Qual Leads</th>
+                        <th>Registrations</th>
+                        <th>FTDs</th>
+                        <th>Active Traders</th>
+                        <th>Net Revenue</th>
+                        <th>Overall</th>
+                    </tr>
+                    <tbody id="dashboardTableBody">
+                        <tr>
+                            <td colspan="10" style="text-align: center; color: #999;">No data saved yet. Fill the Data Entry form and click Save.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- TAB 3: WEEKLY REPORT -->
+        <div class="tab-content">
+            <h2>📈 Weekly Performance Report</h2>
+           
+            <div class="table-wrapper">
+                <table class="excel-table">
+                    <tr>
+                        <th>BD Executive</th>
+                        <th>Week</th>
+                        <th>Min FTD (3)</th>
+                        <th>Min Active (3)</th>
+                        <th>Qual Leads (25)</th>
+                        <th>Registrations (15)</th>
+                        <th>FTD (5)</th>
+                        <th>Status</th>
+                    </tr>
+                    <tbody id="weeklyReportBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: #999;">No weekly data available</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- TAB 4: MONTHLY REPORT -->
+        <div class="tab-content">
+            <h2>📅 Monthly Performance Report</h2>
+           
+            <div class="table-wrapper">
+                <table class="excel-table">
+                    <tr>
+                        <th>BD Executive</th>
+                        <th>Month</th>
+                        <th>Active Traders (10)</th>
+                        <th>Total Deposits</th>
+                        <th>Total Withdrawals</th>
+                        <th>Net Revenue</th>
+                        <th>Reward Tier</th>
+                    </tr>
+                    <tbody id="monthlyReportBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #999;">No monthly data available</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="section-title">🎁 Reward Distribution</div>
+            <table class="excel-table">
+                <tr>
+                    <th>Reward Tier</th>
+                    <th>Net Revenue Range</th>
+                    <th>Reward</th>
+                    <th>Qualified Executives</th>
+                </tr>
+                <tr>
+                    <td>🍺 Encourage</td>
+                    <td>$5,000 - $20,000</td>
+                    <td>Drinking + $20 Gift</td>
+                    <td id="tier1Count">0</td>
+                </tr>
+                <tr>
+                    <td>🎉 Halfway</td>
+                    <td>$20,000 - $50,000</td>
+                    <td>Drinking + $100 Gift</td>
+                    <td id="tier2Count">0</td>
+                </tr>
+                <tr>
+                    <td>👑 Full KPI</td>
+                    <td>$50,000 - $300,000</td>
+                    <td>Drinking + $300 Gift</td>
+                    <td id="tier3Count">0</td>
+                </tr>
+            </table>
+        </div>
+        <!-- TAB 5: EXPORT REPORTS -->
+        <div class="tab-content">
+            <h2>📥 Export Reports</h2>
+           
+            <div class="form-section">
+                <h3>Export Options</h3>
+                <div class="button-group">
+                    <button class="btn btn-success" onclick="exportFullHistory()">📊 Export Full Historical Report</button>
+                    <button class="btn btn-primary" onclick="showMonthlyExportModal()">📅 Export Custom Monthly Report</button>
+                    <button class="btn btn-warning" onclick="exportClientDetails()">👥 Export All Client Details</button>
+                    <button class="btn btn-primary" onclick="exportWeeklyReport()">📈 Export Weekly Summary</button>
+                </div>
+            </div>
+            <div class="summary-box">
+                <h3>📊 Export Descriptions</h3>
+                <div class="summary-item">
+                    <span><strong>Full Historical Report:</strong></span>
+                    <span>All saved data with complete metrics</span>
+                </div>
+                <div class="summary-item">
+                    <span><strong>Custom Monthly Report:</strong></span>
+                    <span>Filter by specific month and BD executive</span>
+                </div>
+                <div class="summary-item">
+                    <span><strong>Client Details:</strong></span>
+                    <span>Detailed list of all clients with contact info</span>
+                </div>
+                <div class="summary-item">
+                    <span><strong>Weekly Summary:</strong></span>
+                    <span>Week-by-week performance overview</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Monthly Export Modal -->
+    <div id="monthlyExportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📅 Export Monthly Report</h3>
+                <span class="close-modal" onclick="closeMonthlyExportModal()">&times;</span>
+            </div>
+            <div class="form-row">
+                <label>Select Month:</label>
+                <select id="exportMonthSelect">
+                    <option value="Jan">January</option>
+                    <option value="Feb">February</option>
+                    <option value="Mar">March</option>
+                    <option value="Apr">April</option>
+                    <option value="May">May</option>
+                    <option value="Jun">June</option>
+                    <option value="Jul">July</option>
+                    <option value="Aug">August</option>
+                    <option value="Sep">September</option>
+                    <option value="Oct">October</option>
+                    <option value="Nov">November</option>
+                    <option value="Dec">December</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>BD Executive:</label>
+                <select id="exportBDSelect">
+                    <option value="all">All Executives</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-success" onclick="exportCustomMonthly()">📥 Export</button>
+                <button class="btn btn-danger" onclick="closeMonthlyExportModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        let savedData = [];
+        let clientCounter = 0;
+        // Initialize date fields
+        const now = new Date();
+        const year = now.getFullYear();
+        const week = getWeekNumber(now);
+        document.getElementById('weekNumber').value = `${year}-W${String(week).padStart(2, '0')}`;
+        document.getElementById('monthSelect').value = now.toLocaleString('en', { month: 'short' });
+
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        function switchTab(index) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+           
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+           
+            tabs[index].classList.add('active');
+            contents[index].classList.add('active');
+           
+            if (index === 1) updateDashboard();
+            if (index === 2) updateWeeklyReport();
+            if (index === 3) updateMonthlyReport();
+        }
+
+        function addClientRow(tableId) {
+            const tbody = document.getElementById(tableId);
+            if (tbody.rows[0].cells.length === 1 && tbody.rows[0].cells[0].style.textAlign === 'center') {
+                tbody.innerHTML = '';
+            }
+           
+            const row = tbody.insertRow();
+            clientCounter++;
+            row.innerHTML = `
+                <td><input type="text" placeholder="Client name" /></td>
+                <td><input type="email" placeholder="email@example.com" /></td>
+                <td>
+                    <select>
+                        <option value="Retail">Retail</option>
+                        <option value="IB">IB</option>
+                    </select>
+                </td>
+                <td><input type="number" placeholder="0" min="0" oninput="calculateRowNet(this)" /></td>
+                <td><input type="number" placeholder="0" min="0" oninput="calculateRowNet(this)" /></td>
+                <td><input type="number" placeholder="0" readonly style="background: #f0f0f0;" /></td>
+                <td>
+                    <select>
+                        <option value="New FTD">New FTD</option>
+                        <option value="Active">Active</option>
+                        <option value="Both">Both</option>
+                    </select>
+                </td>
+                <td><button class="btn btn-danger btn-small" onclick="deleteRow(this)">Delete</button></td>
+            `;
+        }
+
+        function addLeadRow(tableId) {
+            const tbody = document.getElementById(tableId);
+            if (tbody.rows[0].cells.length === 1 && tbody.rows[0].cells[0].style.textAlign === 'center') {
+                tbody.innerHTML = '';
+            }
+           
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td><input type="text" placeholder="Lead name" /></td>
+                <td><input type="email" placeholder="email@example.com" /></td>
+                <td>
+                    <select>
+                        <option value="Retail">Retail</option>
+                        <option value="IB">IB</option>
+                    </select>
+                </td>
+                <td><input type="number" placeholder="0" min="0" /></td>
+                <td><textarea placeholder="Background/Notes"></textarea></td>
+                <td>
+                    <select>
+                        <option value="Qualified">Qualified</option>
+                        <option value="Follow-up">Follow-up</option>
+                        <option value="Hot">Hot</option>
+                    </select>
+                </td>
+                <td><button class="btn btn-danger btn-small" onclick="deleteRow(this)">Delete</button></td>
+            `;
+        }
+
+        function addRegistrationRow(tableId) {
+            const tbody = document.getElementById(tableId);
+            if (tbody.rows[0].cells.length === 1 && tbody.rows[0].cells[0].style.textAlign === 'center') {
+                tbody.innerHTML = '';
+            }
+           
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td><input type="text" placeholder="Client name" /></td>
+                <td><input type="email" placeholder="email@example.com" /></td>
+                <td>
+                    <select>
+                        <option value="Retail">Retail</option>
+                        <option value="IB">IB</option>
+                    </select>
+                </td>
+                <td><input type="number" placeholder="0" min="0" /></td>
+                <td><textarea placeholder="Source/Background"></textarea></td>
+                <td><input type="date" /></td>
+                <td><button class="btn btn-danger btn-small" onclick="deleteRow(this)">Delete</button></td>
+            `;
+        }
+
+        function addFTDRow(tableId) {
+            const tbody = document.getElementById(tableId);
+            if (tbody.rows[0].cells.length === 1 && tbody.rows[0].cells[0].style.textAlign === 'center') {
+                tbody.innerHTML = '';
+            }
+           
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td><input type="text" placeholder="Client name" /></td>
+                <td><input type="email" placeholder="email@example.com" /></td>
+                <td>
+                    <select>
+                        <option value="Retail">Retail</option>
+                        <option value="IB">IB</option>
+                    </select>
+                </td>
+                <td><input type="number" placeholder="0" min="0" oninput="calculateRowNet(this)" /></td>
+                <td><input type="number" placeholder="0" min="0" oninput="calculateRowNet(this)" /></td>
+                <td><input type="number" placeholder="0" readonly style="background: #f0f0f0;" /></td>
+                <td><input type="date" /></td>
+                <td><button class="btn btn-danger btn-small" onclick="deleteRow(this)">Delete</button></td>
+            `;
+        }
+
+        function addActiveTraderRow(tableId) {
+            const tbody = document.getElementById(tableId);
+            if (tbody.rows[0].cells.length === 1 && tbody.rows[0].cells[0].style.textAlign === 'center') {
+                tbody.innerHTML = '';
+            }
+           
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td><input type="text" placeholder="Client name" /></td>
+                <td><input type="email" placeholder="email@example.com" /></td>
+                <td>
+                    <select>
+                        <option value="Retail">Retail</option>
+                        <option value="IB">IB</option>
+                    </select>
+                </td>
+                <td><input type="number" placeholder="0" min="0" oninput="calculateRowNet(this)" /></td>
+                <td><input type="number" placeholder="0" min="0" oninput="calculateRowNet(this)" /></td>
+                <td><input type="number" placeholder="0" readonly style="background: #f0f0f0;" /></td>
+                <td><input type="number" placeholder="0" min="0" /></td>
+                <td><button class="btn btn-danger btn-small" onclick="deleteRow(this)">Delete</button></td>
+            `;
+        }
+
+        function calculateRowNet(input) {
+            const row = input.closest('tr');
+            const deposit = parseFloat(row.cells[3].querySelector('input').value) || 0;
+            const withdrawal = parseFloat(row.cells[4].querySelector('input').value) || 0;
+            row.cells[5].querySelector('input').value = (deposit - withdrawal).toFixed(2);
+        }
+
+        function deleteRow(btn) {
+            btn.closest('tr').remove();
+            calculateSummaries();
+        }
+
+        function calculateNetRevenue() {
+            const deposits = parseFloat(document.getElementById('totalDeposits').value) || 0;
+            const withdrawals = parseFloat(document.getElementById('totalWithdrawals').value) || 0;
+            const net = deposits - withdrawals;
+            document.getElementById('netRevenue').innerHTML = `$${net.toLocaleString()}`;
+            document.getElementById('netRevenueDisplay').innerHTML = `$${net.toLocaleString()}`;
+           
+            let tier = 'None';
+            if (net >= 50000 && net <= 300000) tier = '👑 Full KPI (Drinking + $300 Gift)';
+            else if (net >= 20000) tier = '🎉 Halfway (Drinking + $100 Gift)';
+            else if (net >= 5000) tier = '🍺 Encourage (Drinking + $20 Gift)';
+            document.getElementById('rewardTierDisplay').innerHTML = tier;
+        }
+
+        function calculateSummaries() {
+            // Minimum Requirement
+            const minTable = document.getElementById('minClients');
+            let minFTD = 0, minActive = 0;
+            Array.from(minTable.rows).forEach(row => {
+                if (row.cells.length > 1) {
+                    const status = row.cells[6].querySelector('select').value;
+                    if (status === 'New FTD' || status === 'Both') minFTD++;
+                    if (status === 'Active' || status === 'Both') minActive++;
+                }
+            });
+            document.getElementById('sumMinFTD').innerHTML = minFTD;
+            document.getElementById('sumMinActive').innerHTML = minActive;
+            const minStatus = (minFTD >= 3 && minActive >= 3) ? '✅ Target Met!' : `Need ${3 - minFTD} more FTDs & ${3 - minActive} more Active`;
+            document.getElementById('minTargetStatus').innerHTML = minStatus;
+            document.getElementById('minTargetStatus').style.color = (minFTD >= 3 && minActive >= 3) ? 'green' : 'red';
+           
+            // Qualified Leads
+            const leadsTable = document.getElementById('qualifiedLeads');
+            const qualLeadsCount = leadsTable.rows.length;
+            document.getElementById('sumQualLeads').innerHTML = qualLeadsCount;
+            document.getElementById('qualLeadsStatus').innerHTML = `${qualLeadsCount}/25`;
+            document.getElementById('qualLeadsStatus').style.color = qualLeadsCount >= 25 ? 'green' : 'orange';
+           
+            // Account Registrations
+            const regTable = document.getElementById('accountRegistrations');
+            const regCount = regTable.rows.length;
+            document.getElementById('sumAccountReg').innerHTML = regCount;
+            document.getElementById('accountRegStatus').innerHTML = `${regCount}/15`;
+            document.getElementById('accountRegStatus').style.color = regCount >= 15 ? 'green' : 'orange';
+           
+            // FTD
+            const ftdTable = document.getElementById('ftdClients');
+            let ftdCount = 0, ftdNetSum = 0;
+            Array.from(ftdTable.rows).forEach(row => {
+                if (row.cells.length > 1) {
+                    const net = parseFloat(row.cells[5].querySelector('input').value) || 0;
+                    if (net >= 300) ftdCount++;
+                    ftdNetSum += net;
+                }
+            });
+            document.getElementById('sumFTD').innerHTML = ftdCount;
+            document.getElementById('sumFTDNet').innerHTML = `$${ftdNetSum.toLocaleString()}`;
+            document.getElementById('ftdStatus').innerHTML = `${ftdCount}/5`;
+            document.getElementById('ftdStatus').style.color = ftdCount >= 5 ? 'green' : 'red';
+           
+            // Active Traders
+            const traderTable = document.getElementById('activeTraders');
+            let traderCount = 0, traderNetSum = 0;
+            Array.from(traderTable.rows).forEach(row => {
+                if (row.cells.length > 1) {
+                    const lots = parseFloat(row.cells[6].querySelector('input').value) || 0;
+                    const net = parseFloat(row.cells[5].querySelector('input').value) || 0;
+                    if (lots >= 10) traderCount++;
+                    traderNetSum += net;
+                }
+            });
+            document.getElementById('sumActiveTraders').innerHTML = traderCount;
+            document.getElementById('sumActiveNet').innerHTML = `$${traderNetSum.toLocaleString()}`;
+            document.getElementById('activeTraderStatus').innerHTML = `${traderCount}/10`;
+            document.getElementById('activeTraderStatus').style.color = traderCount >= 10 ? 'green' : 'red';
+        }
+
+        function saveAllData() {
+            const name = document.getElementById('bdName').value;
+            if (!name) {
+                alert('Please select your name!');
+                return;
+            }
+            const week = document.getElementById('weekNumber').value;
+            const month = document.getElementById('monthSelect').value;
+            if (!week || !month) {
+                alert('Please enter week and month!');
+                return;
+            }
+           
+            calculateSummaries();
+            calculateNetRevenue();
+           
+            const minClients = collectTableData('minClients', 7);
+            const qualLeads = collectTableData('qualifiedLeads', 6);
+            const registrations = collectTableData('accountRegistrations', 6);
+            const ftdClients = collectTableData('ftdClients', 7);
+            const activeTraders = collectTableData('activeTraders', 7);
+           
+            const data = {
+                name,
+                week,
+                month,
+                timestamp: new Date().toISOString(),
+                minFTD: parseInt(document.getElementById('sumMinFTD').innerHTML) || 0,
+                minActive: parseInt(document.getElementById('sumMinActive').innerHTML) || 0,
+                qualLeads: parseInt(document.getElementById('sumQualLeads').innerHTML) || 0,
+                accountReg: parseInt(document.getElementById('sumAccountReg').innerHTML) || 0,
+                ftd: parseInt(document.getElementById('sumFTD').innerHTML) || 0,
+                activeTraders: parseInt(document.getElementById('sumActiveTraders').innerHTML) || 0,
+                totalDeposits: parseFloat(document.getElementById('totalDeposits').value) || 0,
+                totalWithdrawals: parseFloat(document.getElementById('totalWithdrawals').value) || 0,
+                netRevenue: parseFloat(document.getElementById('netRevenue').innerHTML.replace(/[^0-9.-]+/g,"")) || 0,
+                rewardTier: document.getElementById('rewardTierDisplay').innerHTML,
+                minClientsData: minClients,
+                qualLeadsData: qualLeads,
+                registrationsData: registrations,
+                ftdClientsData: ftdClients,
+                activeTradersData: activeTraders
+            };
+           
+            savedData.push(data);
+            alert('✅ All data saved successfully!');
+            clearAllData(); // Clear form after save
+            updateBDSelectOptions();
+            updateDashboard();
+            updateWeeklyReport();
+            updateMonthlyReport();
+        }
+
+        function collectTableData(tableId, numFields) {
+            const tbody = document.getElementById(tableId);
+            const data = [];
+            Array.from(tbody.rows).forEach(row => {
+                if (row.cells.length > 1) {
+                    const rowData = [];
+                    for (let i = 0; i < numFields; i++) {
+                        const input = row.cells[i].querySelector('input, select, textarea');
+                        rowData.push(input ? input.value : '');
+                    }
+                    data.push(rowData);
+                }
+            });
+            return data;
+        }
+
+        function clearAllData() {
+            ['minClients', 'qualifiedLeads', 'accountRegistrations', 'ftdClients', 'activeTraders'].forEach(id => {
+                const tbody = document.getElementById(id);
+                tbody.innerHTML = '<tr><td colspan="' + (id === 'qualifiedLeads' || id === 'accountRegistrations' ? 7 : 8) + '" style="text-align: center; color: #999;">No data</td></tr>';
+            });
+            document.getElementById('totalDeposits').value = '';
+            document.getElementById('totalWithdrawals').value = '';
+            calculateNetRevenue();
+            calculateSummaries();
+        }
+
+        function updateDashboard() {
+            if (savedData.length === 0) return;
+           
+            // Aggregate for cards (team totals)
+            let teamMinMet = 0, teamLevel1Met = 0, teamLevel2Met = 0, teamRevenue = 0;
+            let minFTDMetCount = 0, minActiveMetCount = 0, qualLeadsMetCount = 0, regMetCount = 0, ftdMetCount = 0, tradersMetCount = 0;
+            savedData.forEach(d => {
+                if (d.minFTD >= 3) minFTDMetCount++;
+                if (d.minActive >= 3) minActiveMetCount++;
+                if (d.qualLeads >= 25) qualLeadsMetCount++;
+                if (d.accountReg >= 15) regMetCount++;
+                if (d.ftd >= 5) ftdMetCount++;
+                if (d.activeTraders >= 10) tradersMetCount++;
+                teamRevenue += d.netRevenue;
+            });
+            teamMinMet = (minFTDMetCount > 0 ? 1 : 0) + (minActiveMetCount > 0 ? 1 : 0);
+            teamLevel1Met = (qualLeadsMetCount > 0 ? 1 : 0) + (regMetCount > 0 ? 1 : 0);
+            teamLevel2Met = (ftdMetCount > 0 ? 1 : 0) + (tradersMetCount > 0 ? 1 : 0);
+           
+            document.getElementById('dashMinStatus').innerHTML = `${teamMinMet}/2`;
+            document.getElementById('dashLevel1').innerHTML = `${teamLevel1Met}/2`;
+            document.getElementById('dashLevel2').innerHTML = `${teamLevel2Met}/2`;
+            document.getElementById('dashRevenue').innerHTML = `$${teamRevenue.toLocaleString()}`;
+           
+            // Table
+            const tbody = document.getElementById('dashboardTableBody');
+            tbody.innerHTML = '';
+            savedData.forEach(d => {
+                const row = tbody.insertRow();
+                row.insertCell().innerHTML = d.name;
+                row.insertCell().innerHTML = `${d.week} / ${d.month}`;
+                row.insertCell().innerHTML = d.minFTD;
+                row.insertCell().innerHTML = d.minActive;
+                row.insertCell().innerHTML = d.qualLeads;
+                row.insertCell().innerHTML = d.accountReg;
+                row.insertCell().innerHTML = d.ftd;
+                row.insertCell().innerHTML = d.activeTraders;
+                row.insertCell().innerHTML = `$${d.netRevenue.toLocaleString()}`;
+                const metCount = (d.minFTD >= 3 ? 1 : 0) + (d.minActive >= 3 ? 1 : 0) + (d.qualLeads >= 25 ? 1 : 0) +
+                                 (d.accountReg >= 15 ? 1 : 0) + (d.ftd >= 5 ? 1 : 0) + (d.activeTraders >= 10 ? 1 : 0);
+                row.insertCell().innerHTML = `${(metCount / 6 * 100).toFixed(0)}%`;
+            });
+        }
+
+        function updateWeeklyReport() {
+            const tbody = document.getElementById('weeklyReportBody');
+            tbody.innerHTML = '';
+            if (savedData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #999;">No weekly data available</td></tr>';
+                return;
+            }
+            savedData.forEach(d => {
+                const row = tbody.insertRow();
+                row.insertCell().innerHTML = d.name;
+                row.insertCell().innerHTML = d.week;
+                row.insertCell().innerHTML = `${d.minFTD}/3`;
+                row.cells[2].style.color = d.minFTD >= 3 ? 'green' : 'red';
+                row.insertCell().innerHTML = `${d.minActive}/3`;
+                row.cells[3].style.color = d.minActive >= 3 ? 'green' : 'red';
+                row.insertCell().innerHTML = `${d.qualLeads}/25`;
+                row.cells[4].style.color = d.qualLeads >= 25 ? 'green' : 'orange';
+                row.insertCell().innerHTML = `${d.accountReg}/15`;
+                row.cells[5].style.color = d.accountReg >= 15 ? 'green' : 'orange';
+                row.insertCell().innerHTML = `${d.ftd}/5`;
+                row.cells[6].style.color = d.ftd >= 5 ? 'green' : 'red';
+                const allWeeklyMet = d.minFTD >= 3 && d.minActive >= 3 && d.qualLeads >= 25 && d.accountReg >= 15 && d.ftd >= 5;
+                const statusCell = row.insertCell();
+                statusCell.innerHTML = allWeeklyMet ? '✅ Met' : (someMet(d) ? '⚠️ In Progress' : '❌ Not Met');
+                statusCell.style.color = allWeeklyMet ? 'green' : (someMet(d) ? 'orange' : 'red');
+            });
+        }
+
+        function someMet(d) {
+            return d.minFTD > 0 || d.minActive > 0 || d.qualLeads > 0 || d.accountReg > 0 || d.ftd > 0;
+        }
+
+        function updateMonthlyReport() {
+            const tbody = document.getElementById('monthlyReportBody');
+            tbody.innerHTML = '';
+            if (savedData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #999;">No monthly data available</td></tr>';
+                return;
+            }
+            let tier1 = 0, tier2 = 0, tier3 = 0;
+            savedData.forEach(d => {
+                const row = tbody.insertRow();
+                row.insertCell().innerHTML = d.name;
+                row.insertCell().innerHTML = d.month;
+                row.insertCell().innerHTML = `${d.activeTraders}/10`;
+                row.cells[2].style.color = d.activeTraders >= 10 ? 'green' : 'red';
+                row.insertCell().innerHTML = `$${d.totalDeposits.toLocaleString()}`;
+                row.insertCell().innerHTML = `$${d.totalWithdrawals.toLocaleString()}`;
+                row.insertCell().innerHTML = `$${d.netRevenue.toLocaleString()}`;
+                row.cells[5].style.color = d.netRevenue >= 50000 ? 'green' : 'orange';
+                row.insertCell().innerHTML = d.rewardTier;
+               
+                if (d.netRevenue >= 5000 && d.netRevenue < 20000) tier1++;
+                else if (d.netRevenue >= 20000 && d.netRevenue < 50000) tier2++;
+                else if (d.netRevenue >= 50000) tier3++;
+            });
+            document.getElementById('tier1Count').innerHTML = tier1;
+            document.getElementById('tier2Count').innerHTML = tier2;
+            document.getElementById('tier3Count').innerHTML = tier3;
+        }
+
+        function updateBDSelectOptions() {
+            const select = document.getElementById('exportBDSelect');
+            const names = [...new Set(savedData.map(d => d.name))];
+            select.innerHTML = '<option value="all">All Executives</option>';
+            names.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                select.appendChild(option);
+            });
+        }
+
+        function showMonthlyExportModal() {
+            document.getElementById('monthlyExportModal').style.display = 'block';
+        }
+
+        function closeMonthlyExportModal() {
+            document.getElementById('monthlyExportModal').style.display = 'none';
+        }
+
+        function exportCSV(headers, rows, filename) {
+            const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+
+        function exportFullHistory() {
+            if (savedData.length === 0) {
+                alert('No data to export!');
+                return;
+            }
+            const headers = ['Name', 'Week', 'Month', 'Timestamp', 'Min FTD', 'Min Active', 'Qual Leads', 'Registrations', 'FTD', 'Active Traders', 'Total Deposits', 'Total Withdrawals', 'Net Revenue', 'Reward Tier'];
+            const rows = savedData.map(d => [
+                d.name, d.week, d.month, d.timestamp, d.minFTD, d.minActive, d.qualLeads, d.accountReg, d.ftd, d.activeTraders,
+                d.totalDeposits, d.totalWithdrawals, d.netRevenue, d.rewardTier
+            ]);
+            exportCSV(headers, rows, 'full_historical_report.csv');
+        }
+
+        function exportCustomMonthly() {
+            const month = document.getElementById('exportMonthSelect').value;
+            const bd = document.getElementById('exportBDSelect').value;
+            const filtered = savedData.filter(d => d.month === month && (bd === 'all' || d.name === bd));
+            if (filtered.length === 0) {
+                alert('No data for selected filters!');
+                return;
+            }
+            const headers = ['Name', 'Month', 'Active Traders', 'Total Deposits', 'Total Withdrawals', 'Net Revenue', 'Reward Tier'];
+            const rows = filtered.map(d => [d.name, d.month, d.activeTraders, d.totalDeposits, d.totalWithdrawals, d.netRevenue, d.rewardTier]);
+            exportCSV(headers, rows, `monthly_report_${month}${bd !== 'all' ? '_' + bd : ''}.csv`);
+            closeMonthlyExportModal();
+        }
+
+        function exportClientDetails() {
+            if (savedData.length === 0) {
+                alert('No data to export!');
+                return;
+            }
+            const headers = ['Name', 'Week', 'Month', 'Client Type', 'Client Name', 'Email', 'Net Deposit', 'Other Details'];
+            const rows = [];
+            savedData.forEach(d => {
+                // Min Clients
+                d.minClientsData.forEach(c => rows.push([d.name, d.week, d.month, 'Min Client', c[0], c[1], c[5], `Type: ${c[2]}, Status: ${c[6]}`]));
+                // Qual Leads
+                d.qualLeadsData.forEach(c => rows.push([d.name, d.week, d.month, 'Qual Lead', c[0], c[1], c[3], `Type: ${c[2]}, Notes: ${c[4]}, Status: ${c[5]}`]));
+                // Registrations
+                d.registrationsData.forEach(c => rows.push([d.name, d.week, d.month, 'Registration', c[0], c[1], c[3], `Type: ${c[2]}, Source: ${c[4]}, Date: ${c[5]}`]));
+                // FTD Clients
+                d.ftdClientsData.forEach(c => rows.push([d.name, d.week, d.month, 'FTD Client', c[0], c[1], c[5], `Type: ${c[2]}, Date: ${c[6]}`]));
+                // Active Traders
+                d.activeTradersData.forEach(c => rows.push([d.name, d.week, d.month, 'Active Trader', c[0], c[1], c[5], `Type: ${c[2]}, Lots: ${c[6]}`]));
+            });
+            exportCSV(headers, rows, 'client_details.csv');
+        }
+
+        function exportWeeklyReport() {
+            if (savedData.length === 0) {
+                alert('No data to export!');
+                return;
+            }
+            const headers = ['Name', 'Week', 'Min FTD', 'Min Active', 'Qual Leads', 'Registrations', 'FTD', 'Status'];
+            const rows = savedData.map(d => {
+                const allMet = d.minFTD >= 3 && d.minActive >= 3 && d.qualLeads >= 25 && d.accountReg >= 15 && d.ftd >= 5;
+                return [d.name, d.week, d.minFTD, d.minActive, d.qualLeads, d.accountReg, d.ftd, allMet ? 'Met' : 'Not Met'];
+            });
+            exportCSV(headers, rows, 'weekly_summary.csv');
+        }
+    </script>
+</body>
+</html>
