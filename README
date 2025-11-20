@@ -1,0 +1,36 @@
+🎯 4 Clear Tabs:
+📝 Tab 1: Data Entry (For BD Executives)
+
+Simple form to fill name, week, and month
+Clear input fields for each metric
+Auto-status updates (✅ Met / ⚠️ In Progress / ❌ Not Met)
+One-click save and calculate buttons
+
+📊 Tab 2: Manager Dashboard (For Managers)
+
+Quick overview cards showing targets met at each level
+Summary table showing all BD executives' performance
+Team metrics with visual progress bars
+See who's performing at a glance
+
+📈 Tab 3: Weekly Report
+
+All weekly targets in one view
+Track: Min Requirements, Leads, Registrations, FTDs
+Week-by-week comparison by BD executive
+
+📅 Tab 4: Monthly Report
+
+All monthly targets in one view
+Track: Active Traders, Revenue
+Reward tier distribution (who gets what gift)
+Monthly revenue summary
+
+✨ Key Features:
+✅ Individual BD Tracking - Each person enters their name
+✅ Auto-calculations - Status updates automatically
+✅ Color-coded status - Green (met), Yellow (in progress), Red (not met)
+✅ Excel-like tables - Familiar spreadsheet format
+✅ CSV Export - Download data to real Excel
+✅ No complex graphs - Simple, clear numbers
+✅ Separate Weekly/Monthly - No confusion between timeframes
